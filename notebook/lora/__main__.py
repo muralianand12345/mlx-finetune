@@ -74,5 +74,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    #uv run python lora --model mistralai/Mistral-7B-Instruct-v0.2 --data ./model_a_1/data --train --batch-size 1 --lora-layers 4 --adapter-file adapters_mistral.npz --fuse --save-path ./model_a_1/fused_mistral_model 
