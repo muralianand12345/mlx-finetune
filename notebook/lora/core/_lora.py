@@ -30,10 +30,9 @@ class Dataset:
         return len(self._data)
     
 class LORAConfig(BaseModel):
-    layers: int = 16
     train: bool = True
     lora_layers: int = 16
-    prompt: str = None
+    prompt: str | None = None
     temp: float = 0.8
     max_tokens: int = 100
     learning_rate: float = 1e-5
@@ -42,7 +41,7 @@ class LORAConfig(BaseModel):
     batch_size: int = 4
     steps_per_report: int = 10
     steps_per_eval: int = 200
-    resume_adapter_file: str = None
+    resume_adapter_file: str | None = None
     adapter_file: str = "adapters.npz"
     save_every: int = 100
     test: bool = False
@@ -51,8 +50,8 @@ class LORAConfig(BaseModel):
 
 class FUSEConfig(BaseModel):
     adapter_file: str = "adapters.npz"
-    hf_path: str = None
-    upload_name: str = None
+    hf_path: str | None = None
+    upload_name: str | None = None
     de_quantize: bool = False
 
 class LORA:
