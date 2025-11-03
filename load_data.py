@@ -1,7 +1,7 @@
 import os
 import json
 import argparse
-from typing import Callable
+from typing import Callable, Iterable, Dict
 from datasets import load_dataset, Dataset, DatasetDict
 
 class LoadData:
@@ -40,8 +40,8 @@ class LoadData:
         """
         text = ""
         for message in messages:
-            role = message.get('role', '').strip()
-            content = message.get('content', '').strip()
+            role = message.get('role', '')
+            content = message.get('content', '')
             if role and content:
                 text += f"{role.capitalize()}: {content}\n"
         if len(text) < 5:
@@ -81,36 +81,15 @@ class LoadData:
             'test': dataset_train_test['test'],
             'valid': dataset_test_valid['test']
         })
-    
-    def _transform_data(self, dataset: DatasetDict) -> dict:
-        """
-        Helper to transform a dataset by formatting the `messages` field
-        into a single `text` field.
 
-        Args:
-            dataset (DatasetDict): The dataset to transform.
-        Returns:
-            dict: A dictionary with transformed splits.
-        """
-        out = {k: [] for k in dataset.keys()}
-        for split, ds in dataset.items():
-            for item in ds:
-                messages = item.get('messages')
-                if not messages or len(messages) < 3:
-                    # skip malformed entries
-                    continue
-                text = self._format_text(messages)
-                out[split].append({"text": text})
-        return out
-
-    def stream_transformed(self, dataset: DatasetDict):
+    def stream_transformed(self, dataset: DatasetDict) -> Iterable[Dict[str, str]]:
         """
         Helper to stream transformed dataset entries.
 
         Args:
             dataset (DatasetDict): The dataset to transform and stream.
         Yields:
-            tuple: A tuple containing the split name and the transformed entry.
+            Iterable[Dict[str, str]]: Generator yielding transformed dataset entries.
         """
         for split, ds in dataset.items():
             for item in ds:
@@ -119,7 +98,7 @@ class LoadData:
                     continue
                 yield split, {"text": self._format_text(messages)}
 
-    def save(self, function: Callable, n: int | None = None, test_split_ratio: float = 0.2, valid_split_ratio: float = 0.2, write_files: bool = True) -> dict:
+    def save(self, function: Callable, n: int | None = None, test_split_ratio: float = 0.2, valid_split_ratio: float = 0.2, write_files: bool = True) -> Dict[str, str] | Iterable[Dict[str, str]]:
         """
         Helper to save the processed dataset.
 
@@ -130,7 +109,7 @@ class LoadData:
             valid_split_ratio (float): Proportion of the remaining data (after test split) to allocate to the validation split.
             write_files (bool): Whether to write the splits to disk (default: True). If False, returns a generator of transformed entries.
         Returns:
-            dict: If write_files is True, returns a dict with paths to saved files. If False, returns a generator yielding transformed entries.
+            Dict[str, str] | Iterable[Dict[str, str]]: If write_files is True, returns a dict with paths to saved files. If False, returns a generator of transformed entries.
         """
         dataset = self._get_dataset(function=function, n=n)
         dataset_train_test_valid = self._split_dataset(dataset=dataset, test_split_ratio=test_split_ratio, valid_split_ratio=valid_split_ratio)

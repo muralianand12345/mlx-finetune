@@ -1,2 +1,5 @@
 **/model_a_*
 **/__pycache__
+**/.DS_Store
+**/.cache
+.env
